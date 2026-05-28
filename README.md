@@ -423,7 +423,7 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 - [Tamma Kundanareddy](https://github.com/kundanareddy2830)
 - [Mohammad Arif](https://github.com/arifmohammad30)
 - [Durga Pavani](https://github.com/durgapavani18)
-- [Tamma Pavani](https://github.com/pavanithamma01)
+- [Tamma Pavani](https://github.com/pavanithamma)
 - [Jaya Vardhan](https://github.com/jayavardhan-05)
 - Lakshman Kumar
 
