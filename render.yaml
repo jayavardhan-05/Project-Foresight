@@ -6,7 +6,7 @@ services:
     dockerfilePath: ./Dockerfile
     dockerContext: ./backend
     region: singapore
-    plan: starter
+    plan: free
     envVars:
       - key: PORT
         value: "8000"
