@@ -26,4 +26,4 @@ services:
         fromService:
           type: web
           name: foresight-backend
-          property: url
+          property: host
