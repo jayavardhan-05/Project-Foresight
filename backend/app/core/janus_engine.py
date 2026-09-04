@@ -115,11 +115,11 @@ class JanusEngine:
 
 
         return {
-            "energy": energy,
-            "risk_score": risk_score,
+            "energy": float(energy),
+            "risk_score": float(risk_score),
             "status": status,
-            "bias_active": bias_applied,
-            "probabilities": self._simulate_quantum_probabilities(bias_applied)
+            "bias_active": bool(bias_applied),
+            "probabilities": {k: float(v) for k, v in self._simulate_quantum_probabilities(bias_applied).items()}
         }
 
     def _simulate_quantum_probabilities(self, is_fraud):
@@ -290,6 +290,9 @@ class JanusEngine:
             {"term": "ZZ", "coeff": float(coeffs[2]), "desc": "Entanglement Cost"}
         ]
         
+        qsvc_prob = float(qsvc_prob)
+        xgboost_prob = float(xgboost_prob)
+
         return {
             "transaction": tx_data,
             "topology": self._get_transaction_topology(idx),
@@ -300,18 +303,18 @@ class JanusEngine:
                 "decision": "Suspicious" if qsvc_prob > 0.5 else "Safe"
             },
             "vqe": {
-                "energy": vqe_result["energy"],
-                "risk_score": vqe_result["risk_score"],
+                "energy": float(vqe_result["energy"]),
+                "risk_score": float(vqe_result["risk_score"]),
                 "status": vqe_result["status"],
                 "probabilities": vqe_result["probabilities"],
                 "hamiltonian": h_terms,
-                "frustration_energy": vqe_result["energy"], # Use actual calculated energy
+                "frustration_energy": float(vqe_result["energy"]), # Use actual calculated energy
                 "circuit_depth": 15
             },
             "benchmark": {
                 "xgboost_probability": round(xgboost_prob, 4),
                 "model_name": "XGBoost (Vector-Based)",
-                "blindspot_detected": (is_fraud and xgboost_prob < 0.5) # Flag if Classical missed it
+                "blindspot_detected": bool(is_fraud and xgboost_prob < 0.5) # Flag if Classical missed it
             }
         }
 
