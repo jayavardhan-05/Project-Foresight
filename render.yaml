@@ -23,7 +23,4 @@ services:
         destination: /index.html
     envVars:
       - key: VITE_API_URL
-        fromService:
-          type: web
-          name: foresight-backend
-          property: host
+        value: https://foresight-backend-cewr.onrender.com

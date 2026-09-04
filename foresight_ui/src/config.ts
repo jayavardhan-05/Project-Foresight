@@ -1,4 +1,4 @@
-const rawHost = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const rawHost = import.meta.env.VITE_API_URL || 'https://foresight-backend-cewr.onrender.com';
 const apiHost = rawHost.startsWith('http://') || rawHost.startsWith('https://')
   ? rawHost
   : `https://${rawHost}`;
