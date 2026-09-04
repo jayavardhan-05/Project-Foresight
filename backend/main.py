@@ -41,58 +41,57 @@ async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     print("✅ CLIENT CONNECTED: Dashboard is Online")
     
-    # Do not reset idx here. Use the global one.
-    
     try:
         while True:
-            # 1. RUN UNIFIED PROCESS (Shared with Investigation API)
-            full_analysis = janus.process_transaction_full(CURRENT_SIMULATION_INDEX)
-            tx_data = full_analysis["transaction"]
-            vqe_result = full_analysis["vqe"]
-            benchmark = full_analysis["benchmark"]
-            
-            # 2. Construct Live Payload (Detailed for Frontend Storage)
-            # We explicitly send EVERYTHING so the frontend can "store" it for the Investigation View
-            payload = {
-                "transaction": tx_data,
-                "analysis": {
-                    "perturbation_vector": janus.vectors[CURRENT_SIMULATION_INDEX % len(janus.vectors)].tolist(),
-                    "qsvc_prob": full_analysis["qsvc"]["probability"],
-                    "vqe_energy": vqe_result["energy"],
-                    "risk_score": vqe_result["risk_score"],
-                    "status": vqe_result["status"],
-                    "quantum_probabilities": vqe_result["probabilities"]
-                },
-                "system_entropy": vqe_result["risk_score"],
-                "benchmark": benchmark # Include the Classic AI result
-            }
-            
-            # 4. RIGOROUS TERMINAL LOGGING (As Requested)
-            if CURRENT_SIMULATION_INDEX % 5 == 0 or vqe_result["status"] == "CRITICAL":
-                print("\n────────────────────────────────────────────────────────")
-                print(f"📡 PROCESSING TX: {tx_data['id']} | TYPE: {tx_data['type']}")
-                print(f"   💵 AMOUNT: {tx_data['amount']} | ACCOUNT: {tx_data['account']}")
-                print(f"   🔮 JANUS (H-GSAD): {vqe_result['status']} (Energy: {vqe_result['energy']:.2f} eV)")
+            try:
+                # 1. RUN UNIFIED PROCESS (Shared with Investigation API)
+                full_analysis = janus.process_transaction_full(CURRENT_SIMULATION_INDEX)
+                tx_data = full_analysis["transaction"]
+                vqe_result = full_analysis["vqe"]
+                benchmark = full_analysis["benchmark"]
                 
-                # Show actual topology pattern from the engine
-                topology = full_analysis["topology"]
-                if benchmark['blindspot_detected']:
-                     print(f"   ⚠️  MULE RING DETECTED: {topology['pattern']} ({topology['neighbor_count']} nodes)")
+                # 2. Construct Live Payload (Safely sanitized for JSON)
+                payload = {
+                    "transaction": tx_data,
+                    "analysis": {
+                        "perturbation_vector": [float(x) for x in janus.vectors[CURRENT_SIMULATION_INDEX % len(janus.vectors)].tolist()],
+                        "qsvc_prob": float(full_analysis["qsvc"]["probability"]),
+                        "vqe_energy": float(vqe_result["energy"]),
+                        "risk_score": float(vqe_result["risk_score"]),
+                        "status": str(vqe_result["status"]),
+                        "quantum_probabilities": {k: float(v) for k, v in vqe_result["probabilities"].items()}
+                    },
+                    "system_entropy": float(vqe_result["risk_score"]),
+                    "benchmark": benchmark
+                }
                 
-                print("────────────────────────────────────────────────────────\n")
+                # 3. TERMINAL LOGGING
+                if CURRENT_SIMULATION_INDEX % 5 == 0 or vqe_result["status"] == "CRITICAL":
+                    print("\n────────────────────────────────────────────────────────")
+                    print(f"📡 PROCESSING TX: {tx_data['id']} | TYPE: {tx_data['type']}")
+                    print(f"   💵 AMOUNT: {tx_data['amount']} | ACCOUNT: {tx_data['account']}")
+                    print(f"   🔮 JANUS (H-GSAD): {vqe_result['status']} (Energy: {vqe_result['energy']:.2f} eV)")
+                    
+                    topology = full_analysis["topology"]
+                    if benchmark['blindspot_detected']:
+                         print(f"   ⚠️  MULE RING DETECTED: {topology['pattern']} ({topology['neighbor_count']} nodes)")
+                    
+                    print("────────────────────────────────────────────────────────\n")
 
-
-            await websocket.send_json(payload)
-            
-            # 5. PACING (Optimized for "Lively" feel)
-            # Was 8s/3s -> Now 4s (Critical) / 2s (Normal)
-            delay = 4.0 if vqe_result["status"] == "CRITICAL" else 2.0
-            await asyncio.sleep(delay)
-            
-            CURRENT_SIMULATION_INDEX += 1  
+                await websocket.send_json(payload)
+                
+                delay = 4.0 if vqe_result["status"] == "CRITICAL" else 2.0
+                await asyncio.sleep(delay)
+                
+                CURRENT_SIMULATION_INDEX += 1  
+            except Exception as inner_e:
+                print(f"⚠️ Simulation step warning (idx={CURRENT_SIMULATION_INDEX}): {inner_e}")
+                await asyncio.sleep(2.0)
+                CURRENT_SIMULATION_INDEX += 1
             
     except Exception as e:
         print(f"❌ Connection Closed: {e}")
+
 
 @app.post("/api/block/{tx_id}")
 async def block_transaction(tx_id: str):

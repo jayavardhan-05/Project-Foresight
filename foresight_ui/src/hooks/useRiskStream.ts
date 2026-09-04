@@ -13,55 +13,83 @@ export const useRiskStream = () => {
 
     useEffect(() => {
         let reconnectTimer: ReturnType<typeof setTimeout>;
+        let isMounted = true;
 
         const connect = () => {
-            ws.current = new WebSocket(`${WS_BASE_URL}/ws/risk-stream`);
+            if (!isMounted) return;
 
-            ws.current.onopen = () => {
-                console.log('✅ QUANTUM LINK ESTABLISHED');
-            };
+            if (ws.current && (ws.current.readyState === WebSocket.OPEN || ws.current.readyState === WebSocket.CONNECTING)) {
+                ws.current.onclose = null;
+                ws.current.close();
+            }
 
-            ws.current.onmessage = (event) => {
-                const data = JSON.parse(event.data);
+            try {
+                const socket = new WebSocket(`${WS_BASE_URL}/ws/risk-stream`);
+                ws.current = socket;
 
-                // Merge Benchmark data into the Transaction object for the UI
-                const fullTx = { ...data.transaction, benchmark: data.benchmark };
+                socket.onopen = () => {
+                    if (isMounted) console.log('✅ QUANTUM LINK ESTABLISHED');
+                };
 
-                // Prevent duplicates: only add if this ID doesn't exist
-                setTransactions(prev => {
-                    const exists = prev.some(tx => tx.id === fullTx.id);
-                    if (exists) return prev; // Don't add duplicates
-                    return [fullTx, ...prev].slice(0, 50);
-                });
+                socket.onmessage = (event) => {
+                    if (!isMounted) return;
+                    try {
+                        const data = JSON.parse(event.data);
+                        const fullTx = { ...data.transaction, benchmark: data.benchmark };
 
-                setMetrics({
-                    entropy: data.system_entropy,
-                    stability: data.analysis.status,
-                    activeClusters: data.analysis.status === 'CRITICAL' ? 1 : 0
-                });
+                        setTransactions(prev => {
+                            const exists = prev.some(tx => tx.id === fullTx.id);
+                            if (exists) return prev;
+                            return [fullTx, ...prev].slice(0, 50);
+                        });
 
-                setHistory(prev => {
-                    const newPoint = {
-                        time: new Date().toLocaleTimeString(),
-                        entropy: data.system_entropy
-                    };
-                    return [...prev, newPoint].slice(-60);
-                });
-            };
+                        setMetrics({
+                            entropy: data.system_entropy,
+                            stability: data.analysis.status,
+                            activeClusters: data.analysis.status === 'CRITICAL' ? 1 : 0
+                        });
 
-            ws.current.onclose = () => {
-                console.log('❌ QUANTUM LINK LOST. Reconnecting...');
-                reconnectTimer = setTimeout(connect, 3000); // Retry every 3s
-            };
+                        setHistory(prev => {
+                            const newPoint = {
+                                time: new Date().toLocaleTimeString(),
+                                entropy: data.system_entropy
+                            };
+                            return [...prev, newPoint].slice(-60);
+                        });
+                    } catch (e) {
+                        console.error("Error parsing WebSocket message:", e);
+                    }
+                };
+
+                socket.onclose = () => {
+                    if (!isMounted) return;
+                    console.log('❌ QUANTUM LINK LOST. Reconnecting in 3s...');
+                    reconnectTimer = setTimeout(connect, 3000);
+                };
+
+                socket.onerror = (err) => {
+                    console.error('WebSocket Error:', err);
+                };
+            } catch (err) {
+                console.error("Failed to establish WebSocket connection:", err);
+                if (isMounted) {
+                    reconnectTimer = setTimeout(connect, 5000);
+                }
+            }
         };
 
         connect();
 
         return () => {
-            if (ws.current) ws.current.close();
+            isMounted = false;
             clearTimeout(reconnectTimer);
+            if (ws.current) {
+                ws.current.onclose = null;
+                ws.current.close();
+            }
         };
     }, []);
 
     return { transactions, metrics, history };
 };
+
