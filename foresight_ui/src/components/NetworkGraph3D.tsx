@@ -49,13 +49,13 @@ const generateGraphData = () => {
 };
 
 export const NetworkGraph3D = () => {
-    const fgRef = useRef();
+    const fgRef = useRef<any>(null);
     const data = useMemo(() => generateGraphData(), []);
 
     useEffect(() => {
         // Auto-orbit camera
         const fg = fgRef.current;
-        if (fg) {
+        if (fg && typeof fg.cameraPosition === 'function') {
             // fg.cameraPosition({ x: 500, y: 500, z: 600 });
             let angle = 0;
             const interval = setInterval(() => {

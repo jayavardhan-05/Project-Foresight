@@ -100,9 +100,9 @@ export const HilbertSpaceViz = ({ isFraud, vectorMag }: HilbertProps) => {
                     showlegend: true,
                     legend: { x: 0, y: 0, orientation: 'h', font: { color: '#94a3b8' } },
                     scene: {
-                        xaxis: { title: 'Time', showgrid: true, gridcolor: '#1e293b', zeroline: false, showticklabels: false },
-                        yaxis: { title: 'Amount', showgrid: true, gridcolor: '#1e293b', zeroline: false, showticklabels: false },
-                        zaxis: { title: 'Feature Φ', showgrid: true, gridcolor: '#1e293b', zeroline: false, showticklabels: false },
+                        xaxis: { title: { text: 'Time' }, showgrid: true, gridcolor: '#1e293b', zeroline: false, showticklabels: false },
+                        yaxis: { title: { text: 'Amount' }, showgrid: true, gridcolor: '#1e293b', zeroline: false, showticklabels: false },
+                        zaxis: { title: { text: 'Feature Φ' }, showgrid: true, gridcolor: '#1e293b', zeroline: false, showticklabels: false },
                         camera: { eye: { x: 1.5, y: 1.5, z: 1.2 } },
                         bgcolor: '#0B1120'
                     },
