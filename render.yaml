@@ -3,7 +3,7 @@ services:
   - type: web
     name: foresight-backend
     runtime: docker
-    dockerfilePath: ./Dockerfile
+    dockerfilePath: ./backend/Dockerfile
     dockerContext: ./backend
     region: singapore
     plan: free
