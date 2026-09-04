@@ -6,6 +6,7 @@ import { Activity, ShieldAlert, ShieldCheck, Zap, Lock, AlertTriangle, Atom, Arr
 import { useRiskStream } from '../hooks/useRiskStream';
 import { KPI_DATA } from '../data/mockData';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, ReferenceLine } from 'recharts';
+import { API_BASE_URL } from '../config';
 
 export const GlobalCommand = () => {
     const navigate = useNavigate();
@@ -168,7 +169,7 @@ export const GlobalCommand = () => {
                         onClick={() => {
                             // Using the last transaction ID to ban the account
                             const lastTx = transactions[0];
-                            if (lastTx) fetch(`http://localhost:8000/api/block/${lastTx.id}`, { method: 'POST' });
+                            if (lastTx) fetch(`${API_BASE_URL}/api/block/${lastTx.id}`, { method: 'POST' });
                         }}
                         className="px-6 py-2 bg-crimson-600 hover:bg-crimson-500 text-white text-xs font-bold rounded-lg shadow-lg shadow-crimson-600/20 transition-all flex items-center gap-2 animate-pulse"
                     >

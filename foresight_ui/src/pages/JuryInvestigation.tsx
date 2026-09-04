@@ -4,6 +4,7 @@ import { Search, ArrowRight, CheckCircle, AlertTriangle, Atom, Share2, FileText,
 import { EnergyLandscape } from '../components/quantum/EnergyLandscape';
 import { CircuitDiagram } from '../components/quantum/CircuitDiagram';
 import { HilbertSpaceViz } from '../components/quantum/HilbertSpaceViz';
+import { API_BASE_URL } from '../config';
 
 
 interface ForensicData {
@@ -53,7 +54,7 @@ const InvestigationWorkspace = () => {
     const startInvestigation = (id: string) => {
         setSelectedTx(id);
         console.log("Starting investigation for:", id);
-        fetch(`http://localhost:8000/api/investigate/${id}`)
+        fetch(`${API_BASE_URL}/api/investigate/${id}`)
             .then(res => {
                 if (!res.ok) throw new Error("API Request Failed");
                 return res.json();
@@ -440,7 +441,7 @@ const InvestigationWorkspace = () => {
                                         <>
                                             <button
                                                 onClick={() => {
-                                                    fetch(`http://localhost:8000/api/block/${data.transaction.id}`, { method: 'POST' });
+                                                    fetch(`${API_BASE_URL}/api/block/${data.transaction.id}`, { method: 'POST' });
                                                     alert(`Account ${data.transaction.account} FROZEN.`);
                                                     setMode('PICKER');
                                                 }}

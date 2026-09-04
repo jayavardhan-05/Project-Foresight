@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { WS_BASE_URL } from '../config';
 
 export const useRiskStream = () => {
     const [transactions, setTransactions] = useState<any[]>([]);
@@ -14,7 +15,7 @@ export const useRiskStream = () => {
         let reconnectTimer: ReturnType<typeof setTimeout>;
 
         const connect = () => {
-            ws.current = new WebSocket('ws://localhost:8000/ws/risk-stream');
+            ws.current = new WebSocket(`${WS_BASE_URL}/ws/risk-stream`);
 
             ws.current.onopen = () => {
                 console.log('✅ QUANTUM LINK ESTABLISHED');

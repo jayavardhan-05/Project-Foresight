@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Shield, FileText, CheckCircle, Clock, User, AlertOctagon } from 'lucide-react';
+import { API_BASE_URL } from '../config';
 
 interface LogEntry {
     id: string;
@@ -16,7 +17,7 @@ const ComplianceLog = () => {
     useEffect(() => {
         // Fetch real compliance logs
         const fetchLogs = () => {
-            fetch('http://localhost:8000/api/compliance')
+            fetch(`${API_BASE_URL}/api/compliance`)
                 .then(res => res.json())
                 .then(data => setLogs(data));
         };

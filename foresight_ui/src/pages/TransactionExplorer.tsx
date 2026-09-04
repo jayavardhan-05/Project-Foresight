@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Search, Filter, Download, ArrowUpRight, ArrowDownLeft, AlertTriangle, ShieldCheck, Lock } from 'lucide-react';
+import { API_BASE_URL } from '../config';
 
 interface Transaction {
     id: string;
@@ -16,7 +17,7 @@ const TransactionExplorer = () => {
     const [filter, setFilter] = useState('');
 
     useEffect(() => {
-        fetch('http://localhost:8000/api/transactions?limit=500')
+        fetch(`${API_BASE_URL}/api/transactions?limit=500`)
             .then(res => res.json())
             .then(data => {
                 setData(data);

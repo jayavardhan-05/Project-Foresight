@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { TrendingUp, DollarSign, Activity, PieChart as PieIcon } from 'lucide-react';
+import { API_BASE_URL } from '../config';
 
 const AnalyticsReport = () => {
     const [stats, setStats] = useState<any>(null);
 
     useEffect(() => {
-        fetch('http://localhost:8000/api/analytics')
+        fetch(`${API_BASE_URL}/api/analytics`)
             .then(res => res.json())
             .then(data => setStats(data));
     }, []);
